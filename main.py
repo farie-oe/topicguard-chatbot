@@ -7,6 +7,9 @@ from config import TOPIC, TOPIC_DESCRIPTION, SIMILARITY_THRESHOLD
 URL = "https://qut-ai.azure-api.net/ifb220/openai/deployments/gpt-4.1-mini/chat/completions?api-version=2025-03-01-preview"
 EMBEDDING_URL = "https://qut-ai.azure-api.net/ifb220/openai/deployments/text-embedding-3-small/embeddings?api-version=2025-03-01-preview"
 
+# Most user + assistant messages to keep (use an even number)
+MAX_HISTORY_MESSAGES = 10
+
 # Read the API key from the environment (never hard-code it)
 api_key = os.environ.get("API_KEY")
 if not api_key:
@@ -87,6 +90,10 @@ while True:
 
         # Add the reply to the conversation so the bot remembers it
         messages.append({"role": "assistant", "content": reply})
+
+        # Keep the system message and only the most recent messages
+        if len(messages) - 1 > MAX_HISTORY_MESSAGES:
+            messages = [messages[0]] + messages[-MAX_HISTORY_MESSAGES:]
     else:
         print("Error:", response.status_code, response.text)
         # Remove the failed message so it isn't sent again
